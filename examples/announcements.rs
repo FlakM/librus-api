@@ -6,9 +6,9 @@ async fn main() -> Result<(), librus_rs::Error> {
     let client = Client::from_env().await?;
 
     println!("Fetching school notices...");
-    let notices = client.school_notices().await?;
+    let notices = client.school_notices_latest(10).await?;
 
-    for notice in notices.school_notices {
+    for notice in notices {
         let content = Client::notice_content_to_text(&notice.content);
         let preview: String = content.chars().take(120).collect();
         println!(

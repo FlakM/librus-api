@@ -38,8 +38,8 @@ async fn main() -> Result<(), librus_rs::Error> {
     }
 
     // Fetch school notices (announcements)
-    let notices = client.school_notices().await?;
-    for notice in notices.school_notices {
+    let notices = client.school_notices_latest(10).await?;
+    for notice in notices {
         let content = Client::notice_content_to_text(&notice.content);
         let preview: String = content.chars().take(80).collect();
         println!("{}: {}", notice.subject, preview);
@@ -88,8 +88,13 @@ Base URL: `https://synergia.librus.pl/gateway/api/2.0/`
 | `attendance_types()` | Get attendance types |
 | `homeworks()` | Get all homeworks |
 | `school_notices()` | Get school notices (announcements) |
+| `school_notices_page(page, limit)` | Get school notices with pagination |
+| `school_notices_latest(limit)` | Get latest notices (client-side sort) |
 | `user(id)` | Get user by ID |
 | `current_user()` | Get current user details |
+
+Notes:
+- Pagination is supported by `SchoolNotices` (via `page`/`limit` query params).
 
 ### Messages API
 
@@ -104,6 +109,13 @@ Base URL: `https://wiadomosci.librus.pl/api/`
 | `attachment(attachment_id, message_id)` | Download attachment as bytes |
 | `decode_message_content(base64)` | Decode base64 message content to string |
 | `notice_content_to_text(html)` | Convert API-provided notice HTML to text |
+
+## API Documentation
+
+There is no official public documentation for the Synergia API. Community references:
+
+- https://libraries.io/go/github.com%2Fgoferwplynie%2FlibrusApi (lists implemented endpoints; notes lack of official docs)
+- https://ravensiris.github.io/librusapi/ (HTML-scraping docs; not official)
 
 ## Error Handling
 

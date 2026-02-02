@@ -760,6 +760,67 @@ impl Client {
         })
     }
 
+    /// Gets school notices (announcements) with pagination.
+    ///
+    /// # Arguments
+    ///
+    /// * `page` - Page number (1-indexed)
+    /// * `limit` - Number of notices per page
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the request fails or response parsing fails.
+    pub async fn school_notices_page(
+        &self,
+        page: u32,
+        limit: u32,
+    ) -> Result<ResponseSchoolNotices> {
+        let endpoint = format!("SchoolNotices?page={}&limit={}", page, limit);
+        let json = self.get_api(&endpoint).await?;
+        serde_json::from_str(&json).map_err(|e| Error::Parse {
+            source: e,
+            body: json,
+        })
+    }
+
+    /// Gets the latest school notices (announcements).
+    ///
+    /// This paginates through all notices, sorts them by `creation_date` (descending),
+    /// and returns the newest `limit` items.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the request fails or response parsing fails.
+    pub async fn school_notices_latest(&self, limit: usize) -> Result<Vec<SchoolNotice>> {
+        if limit == 0 {
+            return Ok(Vec::new());
+        }
+
+        let page_size: u32 = 50;
+        let mut page = 1;
+        let mut all = Vec::new();
+
+        loop {
+            let resp = self.school_notices_page(page, page_size).await?;
+            if resp.school_notices.is_empty() {
+                break;
+            }
+
+            let count = resp.school_notices.len();
+            all.extend(resp.school_notices);
+
+            if count < page_size as usize {
+                break;
+            }
+
+            page += 1;
+        }
+
+        all.sort_by(|a, b| b.creation_date.cmp(&a.creation_date));
+        all.truncate(limit);
+        Ok(all)
+    }
+
     /// Gets a user by ID.
     ///
     /// Users include teachers, students, and parents.
