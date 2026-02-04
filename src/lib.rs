@@ -126,6 +126,7 @@
 //! ```
 
 mod error;
+mod serde_helpers;
 mod structs;
 
 use reqwest::Client as HttpClient;

@@ -2,6 +2,8 @@
 
 use serde::Deserialize;
 
+use crate::serde_helpers::string_or_int;
+
 /// Response containing school notices (announcements).
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "PascalCase")]
@@ -19,7 +21,8 @@ pub struct ResponseSchoolNotices {
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct SchoolNotice {
-    /// Notice ID.
+    /// Notice ID (can be string or integer in API response).
+    #[serde(deserialize_with = "string_or_int")]
     pub id: String,
     /// Start date of the notice.
     pub start_date: String,
@@ -41,7 +44,8 @@ pub struct SchoolNotice {
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct SchoolNoticeAddedBy {
-    /// Author ID.
+    /// Author ID (can be string or integer in API response).
+    #[serde(deserialize_with = "string_or_int")]
     pub id: String,
     /// API URL for the author.
     pub url: String,
